@@ -1,0 +1,80 @@
+{
+  "host": "localhost",
+  "oauth": {
+    "enable": false,
+    "register": "https://localhost:8443/oauth/register",
+    "tokenRequest": "https://localhost:8443/oauth/token"
+  },
+  "sparql11protocol": {
+    "protocol": "http",
+    "port": 8000,
+    "query": {
+      "path": "/query",
+      "method": "POST",
+      "format": "JSON"
+    },
+    "update": {
+      "path": "/update",
+      "method": "POST",
+      "format": "JSON"
+    }
+  },
+  "sparql11seprotocol": {
+    "protocol": "ws",
+    "availableProtocols": {
+      "ws": {
+        "port": 9000,
+        "path": "/subscribe"
+      },
+      "wss": {
+        "port": 9443,
+        "path": "/secure/subscribe"
+      }
+    }
+  },
+  "namespaces": {
+    "schema": "http://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "sosa": "http://www.w3.org/ns/sosa/",
+    "org": "http://www.w3.org/ns/org#",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    
+    "monas": "https://vaimee.com/monas/ngsi/",
+    "sosa": "http://www.w3.org/ns/sosa/",
+    "ngsi": "https://uri.etsi.org/ngsi-ld/"
+  },
+  "updates": {
+    "SAVE_HISTORY": {
+      "sparql": "INSERT DATA { GRAPH ?graph { ?observation rdf:type monas:ObservationEntity; sosa:hasFeatureOfInterest ?transformer; sosa:madeBySensor	?sensor; sosa:resultTime ?time; sosa:hasSimpleResult ?temperature. }}",
+      "forcedBindings": {
+        "graph": {
+          "type": "uri"
+        },
+        "observation": {
+          "type": "uri"
+        },
+        "transformer": {
+          "type": "uri"
+        },
+        "sensor": {
+          "type": "uri"
+        },    
+        "time": {
+			"type": "literal",
+			"datatype": "xsd:dateTime"
+		},
+		"temperature": {
+			"type": "literal",
+			"datatype": "xsd:float"
+		}
+       }
+    }
+  },
+  "queries": {
+    "GET_OBSERVATIONS": {
+      "sparql": "SELECT ?observation ?transformer ?sensor ?time ?temperature WHERE { GRAPH ?g {	?observation a monas:ObservationEntity; sosa:hasFeatureOfInterest/ngsi:hasObject ?transformer; sosa:madeBySensor/ngsi:hasObject	?sensor; sosa:resultTime/ngsi:hasValue ?time; sosa:hasSimpleResult/ngsi:hasValue ?temperature. } FILTER(STRSTARTS(STR(?g), 'https://vaimee.com/monas/ngsi/observation#')). }"
+    }
+  }
+}
