@@ -46,7 +46,7 @@
     "ngsi": "https://uri.etsi.org/ngsi-ld/"
   },
   "updates": {
-    "SAVE_HISTORY": {
+    "SAVE_OBSERVATION_IN_GRAPH": {
       "sparql": "INSERT DATA { GRAPH ?graph { ?observation rdf:type monas:ObservationEntity; sosa:hasFeatureOfInterest ?transformer; sosa:madeBySensor	?sensor; sosa:resultTime ?time; sosa:hasSimpleResult ?temperature. }}",
       "forcedBindings": {
         "graph": {

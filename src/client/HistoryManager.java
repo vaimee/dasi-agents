@@ -17,7 +17,6 @@ import it.unibo.arces.wot.sepa.pattern.Aggregator;
 import it.unibo.arces.wot.sepa.pattern.JSAP;
 
 public class HistoryManager extends Aggregator {
-	private String HISTORY_GRAPH = "https://vaimee.com/monas/ngsi/historyGraph.ttl";
 
 	public HistoryManager(JSAP appProfile, String subscribeID, String updateID)
 			throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException {
@@ -35,24 +34,23 @@ public class HistoryManager extends Aggregator {
 	}
 
 	private void saveHistory(BindingsResults results) {
-		// TODO Auto-generated method stub
 		List<Bindings> data = results.getBindings();
 		for (Bindings binding : data) {
-
 			String observation = binding.getValue("observation");
 			String transformer = binding.getValue("transformer");
 			String sensor = binding.getValue("sensor");
 			String time = binding.getValue("time");
 			String temperature = binding.getValue("temperature");
+
+			String historyGraph = transformer + "/history.ttl";
 			
 			try {
-				this.setUpdateBindingValue("graph", new RDFTermURI(HISTORY_GRAPH));
+				this.setUpdateBindingValue("graph", new RDFTermURI(historyGraph));
 				this.setUpdateBindingValue("observation", new RDFTermURI(observation));
 				this.setUpdateBindingValue("transformer", new RDFTermURI(transformer));
 				this.setUpdateBindingValue("sensor", new RDFTermURI(sensor));
 				this.setUpdateBindingValue("time", new RDFTermLiteral(time));
 				this.setUpdateBindingValue("temperature", new RDFTermLiteral(temperature));
-
 			} catch (SEPABindingsException e) {
 				e.printStackTrace();
 				continue;
@@ -65,9 +63,7 @@ public class HistoryManager extends Aggregator {
 				e.printStackTrace();
 				continue;
 			}
-
 		}
-
 	}
 
 	public static void main(String[] args) throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException,
@@ -75,7 +71,7 @@ public class HistoryManager extends Aggregator {
 
 		JSAP appProfile = new JSAP("resources/ObservationHistory.jsap");
 
-		HistoryManager app = new HistoryManager(appProfile, "GET_OBSERVATIONS", "SAVE_HISTORY");
+		HistoryManager app = new HistoryManager(appProfile, "GET_OBSERVATIONS", "SAVE_OBSERVATION_IN_GRAPH");
 		app.subscribe(5000L, 3L);
 
 		synchronized (app) {
