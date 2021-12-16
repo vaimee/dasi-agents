@@ -26,6 +26,10 @@ public class FakeTransformer extends Producer {
 	private final double AVERAGE_VALUE = 75.0; // in Celsius degrees
 	private final double VARIATION_AMPLITUDE = 50.0; // in Celsius degrees
 	
+	private final String DOMAIN = "https://vaimee.com";
+	private final String APP_NAME = "monas";
+	private final String COMPANY_ID = "company123";
+
 	public FakeTransformer(JSAP appProfile, String updateID)
 			throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException {
 		super(appProfile, updateID);
@@ -50,10 +54,10 @@ public class FakeTransformer extends Producer {
 	public void produceNewObservations() throws InterruptedException {
 		stepForward();
 		
-		String graph = "https://vaimee.com/monas/company123/observations/0000.2.1/data_without_sysattrs";
-		String observation = "https://vaimee.com/monas/company123/observations/0000.2.1";
-		String transformer = "https://vaimee.com/monas/company123/transformers/0500.0.1";
-		String sensor = "https://vaimee.com/monas/company123/sensors/0000.2.1";
+		String graph = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/observations/0000.2.1/data_without_sysattrs";
+		String observation = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/observations/0000.2.1";
+		String transformer = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/transformers/0500.0.1";
+		String sensor = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/sensors/0000.2.1";
 		String time = getTime();
 		String temperature = getTemperature();
 		
