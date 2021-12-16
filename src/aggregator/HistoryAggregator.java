@@ -1,4 +1,4 @@
-package client;
+package aggregator;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,9 +16,9 @@ import it.unibo.arces.wot.sepa.commons.sparql.RDFTermURI;
 import it.unibo.arces.wot.sepa.pattern.Aggregator;
 import it.unibo.arces.wot.sepa.pattern.JSAP;
 
-public class HistoryManager extends Aggregator {
+public class HistoryAggregator extends Aggregator {
 
-	public HistoryManager(JSAP appProfile, String subscribeID, String updateID)
+	public HistoryAggregator(JSAP appProfile, String subscribeID, String updateID)
 			throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException {
 		super(appProfile, subscribeID, updateID);
 	}
@@ -44,9 +44,13 @@ public class HistoryManager extends Aggregator {
 
 			String historyGraph = transformer + "/history.ttl";
 			
+			// Observation publishers must ensure that every new observation has a unique timestamp,
+			// otherwise overwrites could happen in the history graph!
+			String historyObservation = observation + "." + time.replace(":", ".");
+			
 			try {
 				this.setUpdateBindingValue("graph", new RDFTermURI(historyGraph));
-				this.setUpdateBindingValue("observation", new RDFTermURI(observation));
+				this.setUpdateBindingValue("observation", new RDFTermURI(historyObservation));
 				this.setUpdateBindingValue("transformer", new RDFTermURI(transformer));
 				this.setUpdateBindingValue("sensor", new RDFTermURI(sensor));
 				this.setUpdateBindingValue("time", new RDFTermLiteral(time));
@@ -71,7 +75,7 @@ public class HistoryManager extends Aggregator {
 
 		JSAP appProfile = new JSAP("resources/ObservationHistory.jsap");
 
-		HistoryManager app = new HistoryManager(appProfile, "GET_OBSERVATIONS", "SAVE_OBSERVATION_IN_GRAPH");
+		HistoryAggregator app = new HistoryAggregator(appProfile, "GET_OBSERVATIONS", "SAVE_OBSERVATION_IN_GRAPH");
 		app.subscribe(5000L, 3L);
 
 		synchronized (app) {
@@ -92,46 +96,7 @@ public class HistoryManager extends Aggregator {
 
 	@Override
 	public void onRemovedResults(BindingsResults results) {
-//		List<Bindings> data = results.getBindings();
-//		for (Bindings binding : data) {
-//
-//			String graph = binding.getValue("g");
-//			if (!this.graphExists(graph)) {
-//				String meta_graph = "meta:" + graph;
-//				Producer addContains;
-//				String updateID = "DELETE_META";
-//				try {
-//					addContains = new Producer(appProfile, updateID);
-//					addContains.setUpdateBindingValue("graph", new RDFTermURI(meta_graph));
-//					addContains.update();
-//					addContains.close();
-//				} catch (SEPAProtocolException | SEPASecurityException | SEPAPropertiesException | SEPABindingsException
-//						| IOException e) {
-//					System.err.println("Something went wrong during execution of " + updateID);
-//				}
-//			}
-//			if (!this.isRootContainer(graph, ROOT)) {
-//				try {
-//					String fathergraph = this.getParentContainer(graph);
-//					Producer addContains;
-//					String updateID = "DELETE_CONTAINS";
-//					try {
-//						addContains = new Producer(appProfile, updateID);
-//						addContains.setUpdateBindingValue("fathergraph", new RDFTermURI(fathergraph));
-//						addContains.setUpdateBindingValue("graph", new RDFTermURI(graph));
-//						addContains.update();
-//						addContains.close();
-//					} catch (SEPAProtocolException | SEPASecurityException | SEPAPropertiesException | SEPABindingsException
-//							| IOException e) {
-//						System.err.println("Something went wrong during execution of " + updateID);
-//					}
-//					
-//				} catch (URISyntaxException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//		}
+		// TODO Auto-generated method stub
 	}
 
 	@Override
