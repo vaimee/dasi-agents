@@ -47,7 +47,7 @@
   },
   "updates": {
     "SAVE_OBSERVATION_IN_GRAPH": {
-      "sparql": "INSERT DATA { GRAPH ?graph { ?observation rdf:type monas:ObservationEntity; sosa:hasFeatureOfInterest ?transformer; sosa:madeBySensor	?sensor; sosa:resultTime ?time; sosa:hasSimpleResult ?temperature. }}",
+      "sparql": "WITH ?graph DELETE { ?observation ?property ?value } WHERE { ?observation ?property ?value }; INSERT DATA { GRAPH ?graph { ?observation rdf:type monas:ObservationEntity; sosa:hasFeatureOfInterest ?transformer; sosa:madeBySensor	?sensor; sosa:resultTime ?time; sosa:hasSimpleResult ?temperature. }}",
       "forcedBindings": {
         "graph": {
           "type": "uri"
@@ -67,14 +67,39 @@
 		},
 		"temperature": {
 			"type": "literal",
-			"datatype": "xsd:float"
+			"datatype": "xsd:double"
+		}
+       }
+    },
+    "NEW_OBSERVATION_ENTITY": {
+      "sparql": "CLEAR GRAPH ?graph; INSERT DATA { GRAPH ?graph {	?observation a monas:ObservationEntity; sosa:hasFeatureOfInterest [a ngsi:Relationship; ngsi:hasObject ?transformer]; sosa:madeBySensor [a ngsi:Relationship; ngsi:hasObject ?sensor]; sosa:resultTime [a ngsi:Property; ngsi:hasValue ?time]; sosa:hasSimpleResult [a ngsi:Property; ngsi:hasValue	?temperature]. }}",
+      "forcedBindings": {
+        "graph": {
+          "type": "uri"
+        },
+        "observation": {
+          "type": "uri"
+        },
+        "transformer": {
+          "type": "uri"
+        },
+        "sensor": {
+          "type": "uri"
+        },    
+        "time": {
+			"type": "literal",
+			"datatype": "xsd:dateTime"
+		},
+		"temperature": {
+			"type": "literal",
+			"datatype": "xsd:double"
 		}
        }
     }
   },
   "queries": {
     "GET_OBSERVATIONS": {
-      "sparql": "SELECT ?observation ?transformer ?sensor ?time ?temperature WHERE { GRAPH ?g {	?observation a monas:ObservationEntity; sosa:hasFeatureOfInterest/ngsi:hasObject ?transformer; sosa:madeBySensor/ngsi:hasObject	?sensor; sosa:resultTime/ngsi:hasValue ?time; sosa:hasSimpleResult/ngsi:hasValue ?temperature. } FILTER(REGEX(STR(?g), '.*/monas/[a-zA-Z0-9]+/observations/[0-9.]*/data_without_sysattrs$')). }"
+      "sparql": "SELECT ?observation ?transformer ?sensor ?time ?temperature WHERE { GRAPH ?g {	?observation a monas:ObservationEntity; sosa:hasFeatureOfInterest/ngsi:hasObject ?transformer; sosa:madeBySensor/ngsi:hasObject	?sensor; sosa:resultTime/ngsi:hasValue ?time; sosa:hasSimpleResult/ngsi:hasValue ?temperature. } FILTER(REGEX(STR(?g), '^.*/monas/[a-zA-Z0-9]+/observations/[0-9.]*/data_without_sysattrs$')). }"
     }
   }
 }
