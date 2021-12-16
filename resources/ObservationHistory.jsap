@@ -41,7 +41,7 @@
     "foaf": "http://xmlns.com/foaf/0.1/",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     
-    "monas": "https://vaimee.com/monas/ngsi/",
+    "monas": "https://vaimee.com/monas/",
     "sosa": "http://www.w3.org/ns/sosa/",
     "ngsi": "https://uri.etsi.org/ngsi-ld/"
   },
@@ -74,7 +74,7 @@
   },
   "queries": {
     "GET_OBSERVATIONS": {
-      "sparql": "SELECT ?observation ?transformer ?sensor ?time ?temperature WHERE { GRAPH ?g {	?observation a monas:ObservationEntity; sosa:hasFeatureOfInterest/ngsi:hasObject ?transformer; sosa:madeBySensor/ngsi:hasObject	?sensor; sosa:resultTime/ngsi:hasValue ?time; sosa:hasSimpleResult/ngsi:hasValue ?temperature. } FILTER(REGEX(STR(?g), '^https:\/\/vaimee\.com\/monas\/[a-zA-Z0-9]+\/observations\/[0-9\.]*\/data_without_sysattrs$')). }"
+      "sparql": "SELECT ?observation ?transformer ?sensor ?time ?temperature WHERE { GRAPH ?g {	?observation a monas:ObservationEntity; sosa:hasFeatureOfInterest/ngsi:hasObject ?transformer; sosa:madeBySensor/ngsi:hasObject	?sensor; sosa:resultTime/ngsi:hasValue ?time; sosa:hasSimpleResult/ngsi:hasValue ?temperature. } FILTER(REGEX(STR(?g), '.*/monas/[a-zA-Z0-9]+/observations/[0-9.]*/data_without_sysattrs$')). }"
     }
   }
 }
