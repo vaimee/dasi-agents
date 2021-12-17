@@ -16,9 +16,9 @@ import it.unibo.arces.wot.sepa.commons.sparql.RDFTermURI;
 import it.unibo.arces.wot.sepa.pattern.Aggregator;
 import it.unibo.arces.wot.sepa.pattern.JSAP;
 
-public class HistoryAggregator extends Aggregator {
+public class HistoryKeeper extends Aggregator {
 
-	public HistoryAggregator(JSAP appProfile, String subscribeID, String updateID)
+	public HistoryKeeper(JSAP appProfile, String subscribeID, String updateID)
 			throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException {
 		super(appProfile, subscribeID, updateID);
 	}
@@ -75,7 +75,7 @@ public class HistoryAggregator extends Aggregator {
 
 		JSAP appProfile = new JSAP("resources/ObservationHistory.jsap");
 
-		HistoryAggregator app = new HistoryAggregator(appProfile, "GET_OBSERVATIONS", "SAVE_OBSERVATION_IN_GRAPH");
+		HistoryKeeper app = new HistoryKeeper(appProfile, "GET_OBSERVATIONS", "SAVE_OBSERVATION_IN_GRAPH");
 		app.subscribe(5000L, 3L);
 
 		synchronized (app) {

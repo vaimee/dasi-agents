@@ -23,7 +23,7 @@ import it.unibo.arces.wot.sepa.commons.sparql.RDFTermURI;
 import it.unibo.arces.wot.sepa.pattern.JSAP;
 import it.unibo.arces.wot.sepa.pattern.Producer;
 
-public class FakeTransformer extends Producer {
+public class FakeControlUnit extends Producer {
 	private final TimeZone UTC_TZ = TimeZone.getTimeZone("UTC");
 	private int timeStep = 0;
 	private final Calendar currentTime = Calendar.getInstance(UTC_TZ);
@@ -40,7 +40,7 @@ public class FakeTransformer extends Producer {
 
 	private final String NGSI_LD_ENDPOINT = "http://localhost:1026";
 
-	public FakeTransformer(JSAP appProfile, String updateID)
+	public FakeControlUnit(JSAP appProfile, String updateID)
 			throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException {
 		super(appProfile, updateID);
 		xsdDatetimeFormat.setTimeZone(UTC_TZ);
@@ -188,7 +188,7 @@ public class FakeTransformer extends Producer {
 
 		JSAP appProfile = new JSAP("resources/ObservationHistory.jsap");
 
-		FakeTransformer app = new FakeTransformer(appProfile, "NEW_OBSERVATION_ENTITY");
+		FakeControlUnit app = new FakeControlUnit(appProfile, "NEW_OBSERVATION_ENTITY");
 
 		while (true) {
 			try {
