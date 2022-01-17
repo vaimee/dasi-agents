@@ -47,7 +47,7 @@
   },
   "updates": {
     "SAVE_OBSERVATION_IN_GRAPH": {
-      "sparql": "WITH ?graph DELETE { ?observation ?property ?value } WHERE { ?observation ?property ?value }; INSERT DATA { GRAPH ?graph { ?observation rdf:type monas:ObservationEntity; sosa:hasFeatureOfInterest ?transformer; sosa:madeBySensor	?sensor; sosa:resultTime ?time; sosa:hasSimpleResult ?temperature. }}",
+      "sparql": "WITH ?graph DELETE { ?observation ?property ?value } WHERE { ?observation ?property ?value }; INSERT DATA { GRAPH ?graph { ?observation rdf:type monas:Observation; sosa:hasFeatureOfInterest ?transformer; sosa:madeBySensor	?sensor; sosa:resultTime ?time; sosa:hasSimpleResult ?temperature. }}",
       "forcedBindings": {
         "graph": {
           "type": "uri"
@@ -72,7 +72,7 @@
        }
     },
     "NEW_OBSERVATION_ENTITY": {
-      "sparql": "CLEAR GRAPH ?graph; INSERT DATA { GRAPH ?graph {	?observation a monas:ObservationEntity; sosa:hasFeatureOfInterest [a ngsi:Relationship; ngsi:hasObject ?transformer]; sosa:madeBySensor [a ngsi:Relationship; ngsi:hasObject ?sensor]; sosa:resultTime [a ngsi:Property; ngsi:hasValue ?time]; sosa:hasSimpleResult [a ngsi:Property; ngsi:hasValue	?temperature]. }}",
+      "sparql": "CLEAR GRAPH ?graph; INSERT DATA { GRAPH ?graph {	?observation a monas:Observation; sosa:hasFeatureOfInterest [a ngsi:Relationship; ngsi:hasObject ?transformer]; sosa:madeBySensor [a ngsi:Relationship; ngsi:hasObject ?sensor]; sosa:resultTime [a ngsi:Property; ngsi:hasValue ?time]; sosa:hasSimpleResult [a ngsi:Property; ngsi:hasValue	?temperature]. }}",
       "forcedBindings": {
         "graph": {
           "type": "uri"
