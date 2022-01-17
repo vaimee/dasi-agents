@@ -34,11 +34,13 @@ public class FakeControlUnit extends Producer {
 	private final double AVERAGE_VALUE = 75.0; // in Celsius degrees
 	private final double VARIATION_AMPLITUDE = 50.0; // in Celsius degrees
 
-	private final String DOMAIN = "https://vaimee.com";
+	private final String DOMAIN = "http://localhost:3000";
 	private final String APP_NAME = "monas";
-	private final String COMPANY_ID = "company123";
+	private final String COMPANY_ID = "companyX";
+	private final String SENSOR_ID = "0000.2.1";
+	private final String TRANSFORMER_ID = "13101974.0.0";
 
-	private final String NGSI_LD_ENDPOINT = "http://localhost:1026";
+	private final String NGSI_LD_ENDPOINT = "http://localhost:9090";
 
 	public FakeControlUnit(JSAP appProfile, String updateID)
 			throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException {
@@ -96,8 +98,8 @@ public class FakeControlUnit extends Producer {
 	 * batch-update-attributes-of-multiple-data-entities
 	 */
 	private void sendUpdateToNGSILD(String observation, String time, String temperature) {
-		String updateBody = new StringBuilder("{\"resultTimeProperty\": {\"type\": \"Property\", \"value\": \"")
-				.append(time).append("\"}, \"hasSimpleResultProperty\": {\"type\": \"Property\",	\"value\": \"")
+		String updateBody = new StringBuilder("{\"resultTime\": {\"type\": \"Property\", \"value\": \"")
+				.append(time).append("\"}, \"hasSimpleResult\": {\"type\": \"Property\",	\"value\": \"")
 				.append(temperature).append("\"}}").toString();
 
 		String requestURI = NGSI_LD_ENDPOINT + "/ngsi-ld/v1/entities/" + observation + "/attrs";
@@ -107,8 +109,7 @@ public class FakeControlUnit extends Producer {
 					.timeout(Duration.of(10, ChronoUnit.SECONDS))
 					.method("PATCH", HttpRequest.BodyPublishers.ofString(updateBody))
 					.header("Content-Type", "application/json")
-					.header("Link",
-							"<http://context/ngsi-context.jsonld>; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\"")
+					.header("Link",	"<http://iosonopersia.altervista.org/context.jsonld>; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\", <https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld>; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\"")
 					.build();
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
@@ -170,17 +171,17 @@ public class FakeControlUnit extends Producer {
 	public void produceNewObservations() throws InterruptedException {
 		stepForward();
 
-		String graph = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/observations/0000.2.1/data_without_sysattrs";
-		String observation = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/observations/0000.2.1";
-		String transformer = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/transformers/0500.0.1";
-		String sensor = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/sensors/0000.2.1";
+		String graph = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/observations/" + SENSOR_ID + "/entity/data_without_sysattrs";
+		String observation = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/observations/" + SENSOR_ID;
+		String transformer = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/transformers/" + TRANSFORMER_ID;
+		String sensor = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/sensors/" + SENSOR_ID;
 		String time = getTime();
 		String temperature = getTemperature();
 
 		System.out.println(time + "\t" + temperature);
 
-		sendUpdateQueryToSEPA(graph, observation, transformer, sensor, time, temperature);
-		// sendUpdateToNGSILD(observation, time, temperature);
+		// sendUpdateQueryToSEPA(graph, observation, transformer, sensor, time, temperature);
+		sendUpdateToNGSILD(observation, time, temperature);
 	}
 
 	public static void main(String[] args) throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException,
