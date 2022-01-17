@@ -96,8 +96,8 @@ public class FakeControlUnit extends Producer {
 	 * batch-update-attributes-of-multiple-data-entities
 	 */
 	private void sendUpdateToNGSILD(String observation, String time, String temperature) {
-		String updateBody = new StringBuilder("{\"resultTimeProperty\": {\"type\": \"Property\", \"value \": \"")
-				.append(time).append("\"}, \"hasSimpleResultProperty\": {\"type\": \"Property\",	\"value \": \"")
+		String updateBody = new StringBuilder("{\"resultTimeProperty\": {\"type\": \"Property\", \"value\": \"")
+				.append(time).append("\"}, \"hasSimpleResultProperty\": {\"type\": \"Property\",	\"value\": \"")
 				.append(temperature).append("\"}}").toString();
 
 		String requestURI = NGSI_LD_ENDPOINT + "/ngsi-ld/v1/entities/" + observation + "/attrs";
