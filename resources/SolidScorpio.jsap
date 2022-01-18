@@ -110,7 +110,7 @@
       "sparql": "ASK {GRAPH ?g {?s ?p ?o} }"
     },
     "NGSI": {
-      "sparql": "SELECT DISTINCT ?g WHERE { GRAPH ?g {?s ?p  ?o}  FILTER (!STRSTARTS(STR(?g), 'meta:') && (STRENDS(STR(?g), '/entity/data_without_sysattrs') || STRENDS(STR(?g), '/history.ttl')))}"
+      "sparql": "SELECT DISTINCT ?g WHERE { GRAPH ?g {?s ?p  ?o}  FILTER(!STRSTARTS(STR(?g), 'meta:') && (STRENDS(STR(?g), '/entity/data_without_sysattrs') || STRENDS(STR(?g), '/history.ttl') || STRENDS(STR(?g), '/monas.config.ttl')))}"
     }
   }
 }
