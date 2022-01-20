@@ -14,6 +14,11 @@
     </properties>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -55,7 +60,7 @@
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                             <appendAssemblyId>false</appendAssemblyId>
-                            <finalName>HistoryKeeper-${project.version}</finalName>
+                            <finalName>MetaAdder-${project.version}</finalName>
                         </configuration>
                         <phase>package</phase>
                         <goals>

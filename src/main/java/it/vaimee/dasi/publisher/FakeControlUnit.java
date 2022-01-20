@@ -187,7 +187,7 @@ public class FakeControlUnit extends Producer {
 	public static void main(String[] args) throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException,
 			SEPABindingsException, IOException, InterruptedException {
 
-		JSAP appProfile = new JSAP("resources/ObservationHistory.jsap");
+		JSAP appProfile = new JSAP("configs/ObservationHistory.jsap");
 
 		FakeControlUnit app = new FakeControlUnit(appProfile, "NEW_OBSERVATION_ENTITY");
 
