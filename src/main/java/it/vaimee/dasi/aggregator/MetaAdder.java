@@ -1,4 +1,4 @@
-package aggregator;
+package main.java.aggregator;
 
 import java.io.IOException;
 import java.net.URI;
