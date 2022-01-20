@@ -1,4 +1,4 @@
-package main.java.aggregator;
+package it.vaimee.dasi.aggregator;
 
 import java.io.IOException;
 import java.net.URI;
