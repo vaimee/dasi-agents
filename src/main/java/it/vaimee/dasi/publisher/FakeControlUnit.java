@@ -34,13 +34,13 @@ public class FakeControlUnit extends Producer {
 	private final double AVERAGE_VALUE = 75.0; // in Celsius degrees
 	private final double VARIATION_AMPLITUDE = 50.0; // in Celsius degrees
 
-	private final String DOMAIN = "http://localhost:3000";
+	private final String DOMAIN = "https://pod.dasibreaker.vaimee.it/";
 	private final String APP_NAME = "monas";
 	private final String COMPANY_ID = "companyX";
 	private final String SENSOR_ID = "0000.2.1";
 	private final String TRANSFORMER_ID = "13101974.0.0";
 
-	private final String NGSI_LD_ENDPOINT = "http://localhost:9090";
+	private final String NGSI_LD_ENDPOINT = "https://ngsi.dasibreaker.vaimee.it";
 
 	public FakeControlUnit(JSAP appProfile, String updateID)
 			throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException {
