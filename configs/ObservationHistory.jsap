@@ -1,5 +1,5 @@
 {
-  "host": "localhost",
+  "host": "sepa",
   "oauth": {
     "enable": false,
     "register": "https://localhost:8443/oauth/register",
@@ -41,7 +41,7 @@
     "foaf": "http://xmlns.com/foaf/0.1/",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     
-    "monas": "http://localhost:3000/monas/",
+    "monas": "http://pod.dasibreaker.vaimee.it/monas/",
     "sosa": "http://www.w3.org/ns/sosa/",
     "ngsi": "https://uri.etsi.org/ngsi-ld/"
   },

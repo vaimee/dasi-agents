@@ -23,7 +23,7 @@ import it.unibo.arces.wot.sepa.pattern.JSAP;
 import it.unibo.arces.wot.sepa.pattern.Producer;
 
 public class MetaAdder extends Aggregator {
-	private String ROOT = "http://localhost:3000/";
+	private String ROOT = "https://pod.dasibreaker.vaimee.it/";
 
 	public MetaAdder(JSAP appProfile, String subscribeID, String updateID)
 			throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException {

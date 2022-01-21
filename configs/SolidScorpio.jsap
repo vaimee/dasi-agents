@@ -1,5 +1,5 @@
 {
-  "host": "localhost",
+  "host": "sepa",
   "oauth": {
     "enable": false,
     "register": "https://localhost:8443/oauth/register",
