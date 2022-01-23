@@ -1,4 +1,4 @@
-package it.vaimee.dasi.aggregator;
+package main.java.it.vaimee.dasi.aggregator;
 
 import java.io.IOException;
 import java.net.URI;
@@ -174,7 +174,7 @@ public class MetaAdder extends Aggregator {
 
 	{
 
-		JSAP appProfile = new JSAP("resources/SolidScorpio.jsap");
+		JSAP appProfile = new JSAP("src/main/resources/SolidScorpio.jsap");
 
 		MetaAdder app = new MetaAdder(appProfile, "NGSI", "META_ADDER");
 		app.subscribe(5000L, 3L);

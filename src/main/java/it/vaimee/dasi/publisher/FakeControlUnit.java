@@ -1,4 +1,4 @@
-package it.vaimee.dasi.publisher;
+package main.java.it.vaimee.dasi.publisher;
 
 import java.io.IOException;
 import java.net.URI;

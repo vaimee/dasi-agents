@@ -1,4 +1,4 @@
-package it.vaimee.dasi.aggregator;
+package main.java.it.vaimee.dasi.aggregator;
 
 import java.io.IOException;
 import java.util.List;
@@ -72,8 +72,7 @@ public class HistoryKeeper extends Aggregator {
 
 	public static void main(String[] args) throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException,
 			SEPABindingsException, IOException {
-
-		JSAP appProfile = new JSAP("resources/ObservationHistory.jsap");
+		JSAP appProfile = new JSAP("src/main/resources/ObservationHistory.jsap");
 
 		HistoryKeeper app = new HistoryKeeper(appProfile, "GET_OBSERVATIONS", "SAVE_OBSERVATION_IN_GRAPH");
 		app.subscribe(5000L, 3L);
