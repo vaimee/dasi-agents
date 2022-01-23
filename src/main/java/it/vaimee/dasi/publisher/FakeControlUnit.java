@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class FakeControlUnit {
@@ -25,38 +26,55 @@ public class FakeControlUnit {
 	private final double AVERAGE_VALUE = 75.0; // in Celsius degrees
 	private final double VARIATION_AMPLITUDE = 50.0; // in Celsius degrees
 
-	private final String COMPANY_ID = "companyX";
-	private final String SENSOR_A_ID = "0000.2.1"; // ProbeA for transformer "13101974.0.0"
-	private final String SENSOR_B_ID = "0000.2.2"; // ProbeB for transformer "13101974.0.0"
-	private final String SENSOR_C_ID = "0000.2.3"; // ProbeC for transformer "13101974.0.0"
-	private final String SENSOR_D_ID = "0000.2.4"; // ProbeD for transformer "13101974.0.0"
+	private String COMPANY_ID = "vaimeesrl";
+	private String SENSOR_A_ID = "0000.2.1"; // ProbeA for transformer "13101974.0.0"
+	private String SENSOR_B_ID = "0000.2.2"; // ProbeB for transformer "13101974.0.0"
+	private String SENSOR_C_ID = "0000.2.3"; // ProbeC for transformer "13101974.0.0"
+	private String SENSOR_D_ID = "0000.2.4"; // ProbeD for transformer "13101974.0.0"
 
-	private final String NGSI_LD_ENDPOINT = "https://ngsi-ld.dasibreaker.vaimee.it";
+	private String NGSI_LD_ENDPOINT = "https://ngsi-ld.dasibreaker.vaimee.it";
+	
+	private final String updateQueryTemplate = "{\n"
+			+ "    \"id\": \"monas:${company}/observations/${observation}\",\n"
+			+ "    \"type\": \"monas:Observation\",\n"
+			+ "    \"resultTime\": {\n"
+			+ "        \"type\": \"Property\",\n"
+			+ "        \"value\": \"${timestamp}\"\n"
+			+ "    },\n"
+			+ "    \"hasSimpleResult\": {\n"
+			+ "        \"type\": \"Property\",\n"
+			+ "        \"value\": \"${temperature}\"\n"
+			+ "    }\n"
+			+ "}";
 
 	public FakeControlUnit() {
-		xsdDatetimeFormat.setTimeZone(UTC_TZ);
+		this.xsdDatetimeFormat.setTimeZone(UTC_TZ);
 	}
 
 	private void stepForward() throws InterruptedException {
 		Thread.sleep(TIME_INTERVAL_SEC * 1000); // Sleep 5 seconds
-		timeStep = (timeStep + 1) % (PERIOD_SEC / TIME_INTERVAL_SEC);
-		currentTime.add(Calendar.SECOND, TIME_INTERVAL_SEC);
+		this.timeStep = (this.timeStep + 1) % (PERIOD_SEC / TIME_INTERVAL_SEC);
+		this.currentTime.add(Calendar.SECOND, TIME_INTERVAL_SEC);
 	}
 
-	private String computeTemperature(double timeStep) {
+	private String getTime() {
+		return this.xsdDatetimeFormat.format(this.currentTime.getTime());
+	}
+
+	private String computeTemperature(double curTimeStep) {
 		double temp = AVERAGE_VALUE
-				+ VARIATION_AMPLITUDE * Math.sin((2 * Math.PI / (PERIOD_SEC / TIME_INTERVAL_SEC)) * timeStep);
+				+ VARIATION_AMPLITUDE * Math.sin((2 * Math.PI / (PERIOD_SEC / TIME_INTERVAL_SEC)) * curTimeStep);
 		return Double.toString(temp);
 	}
 	
 	private ObservationUpdate[] getObservationUpdates() {
-		String time = getTime();
+		String time = this.getTime();
 		double timeDisplacement = (PERIOD_SEC / TIME_INTERVAL_SEC) / 4;
 		
-		String tempA = computeTemperature(timeStep + 0*timeDisplacement);
-		String tempB = computeTemperature(timeStep + 1*timeDisplacement);
-		String tempC = computeTemperature(timeStep + 2*timeDisplacement);
-		String tempD = computeTemperature(timeStep + 3*timeDisplacement);
+		String tempA = this.computeTemperature(this.timeStep + 0*timeDisplacement);
+		String tempB = this.computeTemperature(this.timeStep + 1*timeDisplacement);
+		String tempC = this.computeTemperature(this.timeStep + 2*timeDisplacement);
+		String tempD = this.computeTemperature(this.timeStep + 3*timeDisplacement);
 
 		ObservationUpdate[] observations = new ObservationUpdate[4];
 		observations[0] = new ObservationUpdate(SENSOR_A_ID, time, tempA);
@@ -68,25 +86,8 @@ public class FakeControlUnit {
 		return observations;
 	}
 
-	private String getTime() {
-		return xsdDatetimeFormat.format(currentTime.getTime());
-	}
-
 	private String prepareUpdateJSONObject(ObservationUpdate observation) {
-		final String updateQueryTemplate = "{\n"
-		+ "    \"id\": \"monas:${company}/observations/${observation}\",\n"
-		+ "    \"type\": \"monas:Observation\",\n"
-		+ "    \"resultTime\": {\n"
-		+ "        \"type\": \"Property\",\n"
-		+ "        \"value\": \"${timestamp}\"\n"
-		+ "    },\n"
-		+ "    \"hasSimpleResult\": {\n"
-		+ "        \"type\": \"Property\",\n"
-		+ "        \"value\": \"${temperature}\"\n"
-		+ "    }\n"
-		+ "}";
-
-		return updateQueryTemplate
+		return this.updateQueryTemplate
 				.replace("${company}", COMPANY_ID)
 				.replace("${observation}", observation.getObservationID())
 				.replace("${timestamp}", observation.getTimestamp())
@@ -166,8 +167,36 @@ public class FakeControlUnit {
 		this.sendUpdateToNGSILD(newObservations);
 	}
 
+	public void setup() {
+		Map<String, String> env = System.getenv();
+		// Company ID
+		if(env.get("COMPANY_ID") != null) {
+    		this.COMPANY_ID = env.get("COMPANY_ID");
+    	}
+		
+		// Sensor IDs
+		if(env.get("SENSOR_A_ID") != null) {
+    		this.SENSOR_A_ID = env.get("SENSOR_A_ID");
+    	}
+		if(env.get("SENSOR_B_ID") != null) {
+    		this.SENSOR_B_ID = env.get("SENSOR_B_ID");
+    	}
+		if(env.get("SENSOR_C_ID") != null) {
+    		this.SENSOR_C_ID = env.get("SENSOR_C_ID");
+    	}
+		if(env.get("SENSOR_D_ID") != null) {
+    		this.SENSOR_D_ID = env.get("SENSOR_D_ID");
+    	}
+
+		// NGSI-LD endpoint
+		if(env.get("NGSI_LD_ENDPOINT") != null) {
+    		this.NGSI_LD_ENDPOINT = env.get("NGSI_LD_ENDPOINT");
+    	}
+	}
+	
 	public static void main(String[] args) {
 		FakeControlUnit fakeProducer = new FakeControlUnit();
+		fakeProducer.setup();
 		while (true) {
 			try {
 				fakeProducer.produceNewObservations();
