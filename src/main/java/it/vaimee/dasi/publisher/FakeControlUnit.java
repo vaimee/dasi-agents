@@ -201,7 +201,7 @@ public class FakeControlUnit {
 			try {
 				fakeProducer.produceNewObservations();
 			} catch(InterruptedException e) {
-				System.err.println("[[FakeControlUnit was interrupted! Aborting...");
+				System.err.println("[[FakeControlUnit]] was interrupted! Aborting...");
 				System.exit(1);
 			}
 		}
