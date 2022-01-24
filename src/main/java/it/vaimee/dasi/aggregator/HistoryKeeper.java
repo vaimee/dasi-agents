@@ -73,7 +73,7 @@ public class HistoryKeeper extends Aggregator {
 	public static void main(String[] args) throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException,
 			SEPABindingsException, IOException {
 
-		JSAP appProfile = new JSAP("configs/ObservationHistory.jsap");
+		JSAP appProfile = new JSAP("src/main/resources/ObservationHistory.jsap");
 
 		HistoryKeeper app = new HistoryKeeper(appProfile, "GET_OBSERVATIONS", "SAVE_OBSERVATION_IN_GRAPH");
 		app.subscribe(5000L, 3L);

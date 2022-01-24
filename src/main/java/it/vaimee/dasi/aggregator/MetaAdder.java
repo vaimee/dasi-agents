@@ -174,7 +174,7 @@ public class MetaAdder extends Aggregator {
 
 	{
 
-		JSAP appProfile = new JSAP("configs/SolidScorpio.jsap");
+		JSAP appProfile = new JSAP("src/main/resources/SolidScorpio.jsap");
 
 		MetaAdder app = new MetaAdder(appProfile, "NGSI", "META_ADDER");
 		app.subscribe(5000L, 3L);

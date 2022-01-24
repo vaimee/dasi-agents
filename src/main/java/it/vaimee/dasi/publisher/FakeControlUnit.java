@@ -12,18 +12,10 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
+import java.util.Map;
 import java.util.TimeZone;
 
-import it.unibo.arces.wot.sepa.commons.exceptions.SEPABindingsException;
-import it.unibo.arces.wot.sepa.commons.exceptions.SEPAPropertiesException;
-import it.unibo.arces.wot.sepa.commons.exceptions.SEPAProtocolException;
-import it.unibo.arces.wot.sepa.commons.exceptions.SEPASecurityException;
-import it.unibo.arces.wot.sepa.commons.sparql.RDFTermLiteral;
-import it.unibo.arces.wot.sepa.commons.sparql.RDFTermURI;
-import it.unibo.arces.wot.sepa.pattern.JSAP;
-import it.unibo.arces.wot.sepa.pattern.Producer;
-
-public class FakeControlUnit extends Producer {
+public class FakeControlUnit {
 	private final TimeZone UTC_TZ = TimeZone.getTimeZone("UTC");
 	private int timeStep = 0;
 	private final Calendar currentTime = Calendar.getInstance(UTC_TZ);
@@ -34,87 +26,106 @@ public class FakeControlUnit extends Producer {
 	private final double AVERAGE_VALUE = 75.0; // in Celsius degrees
 	private final double VARIATION_AMPLITUDE = 50.0; // in Celsius degrees
 
-	private final String DOMAIN = "https://pod.dasibreaker.vaimee.it/";
-	private final String APP_NAME = "monas";
-	private final String COMPANY_ID = "companyX";
-	private final String SENSOR_ID = "0000.2.1";
-	private final String TRANSFORMER_ID = "13101974.0.0";
+	private String COMPANY_ID = "vaimeesrl";
+	private String SENSOR_A_ID = "0000.2.1"; // ProbeA for transformer "13101974.0.0"
+	private String SENSOR_B_ID = "0000.2.2"; // ProbeB for transformer "13101974.0.0"
+	private String SENSOR_C_ID = "0000.2.3"; // ProbeC for transformer "13101974.0.0"
+	private String SENSOR_D_ID = "0000.2.4"; // ProbeD for transformer "13101974.0.0"
 
-	private final String NGSI_LD_ENDPOINT = "https://ngsi.dasibreaker.vaimee.it";
+	private String NGSI_LD_ENDPOINT = "https://ngsi-ld.dasibreaker.vaimee.it";
+	
+	private final String updateQueryTemplate = "{\n"
+			+ "    \"id\": \"monas:${company}/observations/${observation}\",\n"
+			+ "    \"type\": \"monas:Observation\",\n"
+			+ "    \"resultTime\": {\n"
+			+ "        \"type\": \"Property\",\n"
+			+ "        \"value\": \"${timestamp}\"\n"
+			+ "    },\n"
+			+ "    \"hasSimpleResult\": {\n"
+			+ "        \"type\": \"Property\",\n"
+			+ "        \"value\": \"${temperature}\"\n"
+			+ "    }\n"
+			+ "}";
 
-	public FakeControlUnit(JSAP appProfile, String updateID)
-			throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException {
-		super(appProfile, updateID);
-		xsdDatetimeFormat.setTimeZone(UTC_TZ);
+	public FakeControlUnit() {
+		this.xsdDatetimeFormat.setTimeZone(UTC_TZ);
 	}
 
 	private void stepForward() throws InterruptedException {
 		Thread.sleep(TIME_INTERVAL_SEC * 1000); // Sleep 5 seconds
-		timeStep = (timeStep + 1) % (PERIOD_SEC / TIME_INTERVAL_SEC);
-		currentTime.add(Calendar.SECOND, TIME_INTERVAL_SEC);
-	}
-
-	private String getTemperature() {
-		double temperature = AVERAGE_VALUE
-				+ VARIATION_AMPLITUDE * Math.sin((2 * Math.PI / (PERIOD_SEC / TIME_INTERVAL_SEC)) * timeStep);
-		return Double.toString(temperature);
+		this.timeStep = (this.timeStep + 1) % (PERIOD_SEC / TIME_INTERVAL_SEC);
+		this.currentTime.add(Calendar.SECOND, TIME_INTERVAL_SEC);
 	}
 
 	private String getTime() {
-		return xsdDatetimeFormat.format(currentTime.getTime());
+		return this.xsdDatetimeFormat.format(this.currentTime.getTime());
 	}
 
-	private void sendUpdateQueryToSEPA(String graph, String observation, String transformer, String sensor, String time,
-			String temperature) {
-		try {
-			this.setUpdateBindingValue("graph", new RDFTermURI(graph));
-			this.setUpdateBindingValue("observation", new RDFTermURI(observation));
-			this.setUpdateBindingValue("transformer", new RDFTermURI(transformer));
-			this.setUpdateBindingValue("sensor", new RDFTermURI(sensor));
-			this.setUpdateBindingValue("time", new RDFTermLiteral(time));
-			this.setUpdateBindingValue("temperature", new RDFTermLiteral(temperature));
-		} catch (SEPABindingsException e) {
-			e.printStackTrace();
-		}
+	private String computeTemperature(double curTimeStep) {
+		double temp = AVERAGE_VALUE
+				+ VARIATION_AMPLITUDE * Math.sin((2 * Math.PI / (PERIOD_SEC / TIME_INTERVAL_SEC)) * curTimeStep);
+		return Double.toString(temp);
+	}
+	
+	private ObservationUpdate[] getObservationUpdates() {
+		String time = this.getTime();
+		double timeDisplacement = (PERIOD_SEC / TIME_INTERVAL_SEC) / 4;
+		
+		String tempA = this.computeTemperature(this.timeStep + 0*timeDisplacement);
+		String tempB = this.computeTemperature(this.timeStep + 1*timeDisplacement);
+		String tempC = this.computeTemperature(this.timeStep + 2*timeDisplacement);
+		String tempD = this.computeTemperature(this.timeStep + 3*timeDisplacement);
 
-		try {
-			this.update();
-		} catch (SEPASecurityException | SEPAProtocolException | SEPAPropertiesException | SEPABindingsException e) {
-			e.printStackTrace();
-		}
+		ObservationUpdate[] observations = new ObservationUpdate[4];
+		observations[0] = new ObservationUpdate(SENSOR_A_ID, time, tempA);
+		observations[1] = new ObservationUpdate(SENSOR_B_ID, time, tempB);
+		observations[2] = new ObservationUpdate(SENSOR_C_ID, time, tempC);
+		observations[3] = new ObservationUpdate(SENSOR_D_ID, time, tempD);
+		
+		System.out.println("New observations: @" + time + " [" + tempA + ", " + tempB + ", " + tempC + ", " + tempD +"]");
+		return observations;
+	}
+
+	private String prepareUpdateJSONObject(ObservationUpdate observation) {
+		return this.updateQueryTemplate
+				.replace("${company}", COMPANY_ID)
+				.replace("${observation}", observation.getObservationID())
+				.replace("${timestamp}", observation.getTimestamp())
+				.replace("${temperature}", observation.getTemperature());
 	}
 
 	/*
-	 * Currently implementing the "OVERWRITE MULTIPLE ATTRIBUTES OF A DATA ENTITY"
-	 * strategy
-	 * https://ngsi-ld-tutorials.readthedocs.io/en/latest/ngsi-ld-operations.html#
-	 * overwrite-multiple-attributes-of-a-data-entity
-	 * 
-	 * TODO: a control unit should update the temperature of every sensor (A,B,C,D)
-	 * at the same time to save bandwidth! The
-	 * "BATCH UPDATE ATTRIBUTES OF MULTIPLE DATA ENTITIES" strategy should be
-	 * implemented here.
+	 * "BATCH UPDATE ATTRIBUTES OF MULTIPLE DATA ENTITIES"
 	 * https://ngsi-ld-tutorials.readthedocs.io/en/latest/ngsi-ld-operations.html#
 	 * batch-update-attributes-of-multiple-data-entities
 	 */
-	private void sendUpdateToNGSILD(String observation, String time, String temperature) {
-		String updateBody = new StringBuilder("{\"resultTime\": {\"type\": \"Property\", \"value\": \"")
-				.append(time).append("\"}, \"hasSimpleResult\": {\"type\": \"Property\",	\"value\": \"")
-				.append(temperature).append("\"}}").toString();
-
-		String requestURI = NGSI_LD_ENDPOINT + "/ngsi-ld/v1/entities/" + observation + "/attrs";
+	private void sendUpdateToNGSILD(ObservationUpdate[] observations) {
+		String updateBody = "[\n";
+		for (int i = 0; i < observations.length; ++i) {
+			ObservationUpdate curObs = observations[i];
+			updateBody += this.prepareUpdateJSONObject(curObs);
+			if (i < observations.length - 1) {
+				// It's not the last JSON object in the list!
+				updateBody += ",";
+			}
+			updateBody += "\n";
+		}
+		updateBody += "]\n";
+		
+		String requestURI = NGSI_LD_ENDPOINT + "/ngsi-ld/v1/entityOperations/update?options=update";
 		HttpRequest request = null;
 		try {
 			request = HttpRequest.newBuilder().uri(new URI(requestURI)).version(HttpClient.Version.HTTP_1_1)
-					.timeout(Duration.of(10, ChronoUnit.SECONDS))
-					.method("PATCH", HttpRequest.BodyPublishers.ofString(updateBody))
+					.timeout(Duration.of(5, ChronoUnit.SECONDS))
+					.method("POST", HttpRequest.BodyPublishers.ofString(updateBody))
 					.header("Content-Type", "application/json")
-					.header("Link",	"<http://iosonopersia.altervista.org/context.jsonld>; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\", <https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld>; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\"")
+					.header("Link",	"<http://iosonopersia.altervista.org/context.jsonld>; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\","
+							+ " <https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld>; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\"")
 					.build();
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
-			System.err.println("ERROR: request URI's syntax is invalid. Aborting...");
-			System.exit(1);
+			System.err.println("ERROR: request URI's syntax is invalid. Request failed!");
+			return;
 		}
 
 		HttpResponse<String> response = null;
@@ -122,14 +133,14 @@ public class FakeControlUnit extends Producer {
 			response = HttpClient.newBuilder().build().send(request, BodyHandlers.ofString());
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
-			System.err.println("ERROR: failed to obtain a response from the server. Aborting...");
-			System.exit(2);
+			System.err.println("ERROR: failed to obtain a response from the server. Request failed!");
+			return;
 		}
 		;
 
 		if (!request.uri().toString().equals(requestURI) || !response.uri().toString().equals(requestURI)) {
-			System.err.println("ERROR: request URI was changed, maybe because of a redirect. Aborting...");
-			System.exit(3);
+			System.err.println("ERROR: request URI was changed, maybe because of a redirect. Request failed!");
+			return;
 		}
 
 		switch (response.statusCode()) {
@@ -140,68 +151,60 @@ public class FakeControlUnit extends Producer {
 		case 207: {
 			// Only the Attributes included in the response payload were successfully updated.
 			// Body: UpdateResult
-			System.err.println("ERROR: only some attributes were successfully updated. Aborting...");
-			System.exit(4);
-		} break;
-		case 400: {
-			/*
-			 * It is used to indicate that the request or its content is incorrect, see clause 6.3.2.
-			 * In the returned ProblemDetails structure, the "detail" attribute should
-			 * convey more information about the error.
-			 */
-			// Body: ProblemDetails
-			
-			// TODO: parse the response payload to extract the "detail" attribute and use it as error message
-			System.err.println("ERROR: request was incorrect. Aborting...");
-			System.exit(5);
-		} break;
-		case 404: {
-			// It is used when a client provided an	entity identifier not known to the system, see clause 6.3.2.
-			// Body: ProblemDetails
-			System.err.println("ERROR: entity identifier is not known to the server. Aborting...");
-			System.exit(6);
+			System.err.println("ERROR: only some attributes were successfully updated.");
+			System.err.println("ERROR: response from SCORPIO is [STATUS " + response.statusCode() + "] " + response.body());
 		} break;
 		default: {
-			System.err.println("ERROR: response status code is not compliant with the NGSI-LD spec. Aborting...");
-			System.exit(7);
+			System.err.println("ERROR: response from SCORPIO is [STATUS " + response.statusCode() + "] " + response.body());
 		}
 		}
 	}
 
 	public void produceNewObservations() throws InterruptedException {
-		stepForward();
+		this.stepForward();		
 
-		String graph = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/observations/" + SENSOR_ID + "/entity/data_without_sysattrs";
-		String observation = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/observations/" + SENSOR_ID;
-		String transformer = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/transformers/" + TRANSFORMER_ID;
-		String sensor = DOMAIN + "/" + APP_NAME + "/" + COMPANY_ID + "/sensors/" + SENSOR_ID;
-		String time = getTime();
-		String temperature = getTemperature();
-
-		System.out.println(time + "\t" + temperature);
-
-		// sendUpdateQueryToSEPA(graph, observation, transformer, sensor, time, temperature);
-		sendUpdateToNGSILD(observation, time, temperature);
+		ObservationUpdate[] newObservations = this.getObservationUpdates();
+		this.sendUpdateToNGSILD(newObservations);
 	}
 
-	public static void main(String[] args) throws SEPAProtocolException, SEPASecurityException, SEPAPropertiesException,
-			SEPABindingsException, IOException, InterruptedException {
+	public void setup() {
+		Map<String, String> env = System.getenv();
+		// Company ID
+		if(env.get("COMPANY_ID") != null) {
+    		this.COMPANY_ID = env.get("COMPANY_ID");
+    	}
+		
+		// Sensor IDs
+		if(env.get("SENSOR_A_ID") != null) {
+    		this.SENSOR_A_ID = env.get("SENSOR_A_ID");
+    	}
+		if(env.get("SENSOR_B_ID") != null) {
+    		this.SENSOR_B_ID = env.get("SENSOR_B_ID");
+    	}
+		if(env.get("SENSOR_C_ID") != null) {
+    		this.SENSOR_C_ID = env.get("SENSOR_C_ID");
+    	}
+		if(env.get("SENSOR_D_ID") != null) {
+    		this.SENSOR_D_ID = env.get("SENSOR_D_ID");
+    	}
 
-		JSAP appProfile = new JSAP("configs/ObservationHistory.jsap");
-
-		FakeControlUnit app = new FakeControlUnit(appProfile, "NEW_OBSERVATION_ENTITY");
-
+		// NGSI-LD endpoint
+		if(env.get("NGSI_LD_ENDPOINT") != null) {
+    		this.NGSI_LD_ENDPOINT = env.get("NGSI_LD_ENDPOINT");
+    	}
+	}
+	
+	public static void main(String[] args) {
+		FakeControlUnit fakeProducer = new FakeControlUnit();
+		fakeProducer.setup();
 		while (true) {
 			try {
-				app.produceNewObservations();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				break;
+				fakeProducer.produceNewObservations();
+			} catch(InterruptedException e) {
+				System.err.println("[[FakeControlUnit was interrupted! Aborting...");
+				System.exit(1);
 			}
 		}
-
-		app.close();
-
 	}
 
 }
