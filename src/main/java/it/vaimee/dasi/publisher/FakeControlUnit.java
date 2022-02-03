@@ -18,7 +18,6 @@ import java.util.TimeZone;
 public class FakeControlUnit {
 	private final TimeZone UTC_TZ = TimeZone.getTimeZone("UTC");
 	private int timeStep = 0;
-	private final Calendar currentTime = Calendar.getInstance(UTC_TZ);
 	private final DateFormat xsdDatetimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
 	private final int PERIOD_SEC = 60 * 60; // in seconds
@@ -54,11 +53,10 @@ public class FakeControlUnit {
 	private void stepForward() throws InterruptedException {
 		Thread.sleep(TIME_INTERVAL_SEC * 1000); // Sleep 5 seconds
 		this.timeStep = (this.timeStep + 1) % (PERIOD_SEC / TIME_INTERVAL_SEC);
-		this.currentTime.add(Calendar.SECOND, TIME_INTERVAL_SEC);
 	}
 
 	private String getTime() {
-		return this.xsdDatetimeFormat.format(this.currentTime.getTime());
+		return this.xsdDatetimeFormat.format(Calendar.getInstance(UTC_TZ).getTime());
 	}
 
 	private String computeTemperature(double curTimeStep) {
